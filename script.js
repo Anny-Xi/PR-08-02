@@ -101,24 +101,23 @@ function drawPose(result) {
     // console.log(result)
     // teken de coordinaten in het canvas
     for (const landmark of result.landmarks) {
-        drawingUtils.drawLandmarks(landmark, { radius: 2 });
+        console.log(landmark);
+        drawingUtils.drawLandmarks(landmark, { radius: 1 });
         drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+        
+        for (const nose of landmark) {
+            console.log(`x position ${nose.x} y position ${nose.y}`);
+
+            //Beweeg de bril mee
+            let translateX = (1-nose.x) * 480-85;
+            let translateY = nose.y * 270 -60;
+            sunglasses.style.transform = "translate(" + translateX + "px, " + translateY + "px)";
+            break;
+        }
+
+
+
     }
-
-    //Beweeg de bril mee
-
-    // console.log(result["landmarks"][0]);
-    // console.log(result)
-
-    const landmarksNose = result.landmarks[0][0];
-    console.log(landmarksNose)
-    
-    // const landmarkNose = landmarksNose[0];
-    // console.log(landmarkNose); 
-
-    let translateX = 0
-    let translateY = 0
-    sunglasses.style.transform = "translate(" + translateX + "px, " + translateY + "px)";
 }
 
 
