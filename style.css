@@ -1,6 +1,17 @@
 body {
-    font-family: sans-serif;
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
     margin: 0;
+    background-color: black;
+    color: white;
+}
+
+main{
+    width: 80vw;
+    margin: 10vh auto;
+    height: auto;
 }
 
 video {
@@ -14,9 +25,9 @@ button {
     font-size: 1em;
     padding: 1em;
 }
-.save{
+#save{
     position: absolute;
-    top: 500px;
+    top: 700px;
 }
 
 .videoView {
@@ -30,11 +41,6 @@ button {
     height: 720px; 
     position: absolute
     
-}
-.sunglasses {
-    position:absolute;
-    width: 10%;
-    z-index: 2;
 }
 
 .canvas {
@@ -52,4 +58,10 @@ button {
     top: 0px;
     width:1280;
     height:720;
+}
+
+#canvas_template{
+    width: 480px;
+    height: 270px;
+    background-color: white;
 }

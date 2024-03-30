@@ -13,18 +13,30 @@
 </head>
 
 <body>
-    <section>
-        <h1>MediaPipe simplified Webcam bodypose example</h1>
-        <button id="webcamButton">Loading Pose Model...</button>
-    </section>
-    <section id="liveView" class="videoView">
-        <video id="webcam" autoplay playsinline muted></video>
-        <canvas class="output_canvas" id="output_canvas"></canvas>
-        <img src="https://pngimg.com/d/sunglasses_PNG155.png" alt="glass" class="sunglasses">
-    </section>  
-    <section>
-        <button class="save">Save to local storage</button>
-    </section>
+    <main>
+        <section>
+            <h1>Left right up and down</h1>
+            <p>there is four movement, left right up and down, you have to make other movement than the computer guesst
+                <br />
+                for example, if computer say "up" but you point down, you win <br /> if computer say "right" and you
+                also poin right, you lose</p>
+            <button id="webcamButton">Loading Pose Model...</button>
+        </section>
+        <section id="liveView" class="videoView">
+            <video id="webcam" autoplay playsinline muted></video>
+            <canvas class="output_canvas" id="output_canvas"></canvas>
+            <div id="canvas_template"></div>
+        </section>
+        <section>
+            <button id="save">Save to local storage</button>
+        </section>
+        <section class="scores">
+            <p>Your score is
+            <p id="player_score"></p> point</p>
+            <p>NPC score is
+            <p id="npc_score"></p> point</p>
+        </section>
+    </main>
 </body>
 
 </html>

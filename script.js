@@ -4,13 +4,14 @@ import kNear from "./knear.js"
 const k = 3
 const machine = new kNear(k);
 
-let sunglasses = document.querySelector(".sunglasses");
-
 const video = document.getElementById("webcam");
 const canvasElement = document.getElementById("output_canvas");
 const enableWebcamButton = document.getElementById("webcamButton");
 const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
+
+const savedHands = [];
+const saveButton = document.getElementById("save");
 
 
 let handLandmarker = undefined;
@@ -43,7 +44,7 @@ const createHandLandmarker = async () => {
             delegate: "GPU"
         },
         runningMode: "VIDEO",
-        numHands: 2
+        numHands: 1
     });
     enableWebcamButton.addEventListener("click", enableCam);
     enableWebcamButton.innerText = "Start de Game!"
@@ -105,30 +106,34 @@ function drawHand(result) {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     // log de coordinaten
     // console.log(result)
+
     // teken de coordinaten in het canvas
     for (const landmark of result.landmarks) {
-        console.log(landmark);
+        // console.log(landmark);
         drawingUtils.drawLandmarks(landmark, { color: "#FF0000", radius: 1 });
         drawingUtils.drawConnectors(landmark, HandLandmarker.HAND_CONNECTIONS, {
             color: "#00FF00",
             lineWidth: 1
         });
 
-        for (const nose of landmark) {
-            console.log(`x position ${nose.x} y position ${nose.y}`);
+        for (const markPosition of landmark) {
+            // console.log(`x position ${markPosition.x} y position ${markPosition.y}`);
+            savedHands.push(markPosition.x, + markPosition.y);
 
-            //Beweeg de bril mee
-            let translateX = (1 - nose.x) * 480 - 85;
-            let translateY = nose.y * 270 - 60;
-            sunglasses.style.transform = "translate(" + translateX + "px, " + translateY + "px)";
-            break;
         }
 
+        const hands = JSON.stringify(savedHands);
 
-
+        saveButton.addEventListener("click", () => {
+            localStorage.setItem("left", hands);
+            console.log(localStorage.getItem("left"))
+        });
     }
-}
 
+    //clear array for the hand landmarks
+    savedHands.length = 0;
+
+}
 
 
 startApp()
