@@ -1,11 +1,10 @@
-import { PoseLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
+import { HandLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
 import kNear from "./knear.js"
 
 const k = 3
 const machine = new kNear(k);
 
 let sunglasses = document.querySelector(".sunglasses");
-
 
 const video = document.getElementById("webcam");
 const canvasElement = document.getElementById("output_canvas");
@@ -14,7 +13,7 @@ const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 
 
-let poseLandmarker = undefined;
+let handLandmarker = undefined;
 let webcamRunning = false;
 let lastVideoTime = -1;
 
@@ -27,7 +26,7 @@ const videoHeight = "270px"
 function startApp() {
     const hasGetUserMedia = () => { var _a; return !!((_a = navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.getUserMedia); };
     if (hasGetUserMedia()) {
-        createPoseLandmarker();
+        createHandLandmarker();
     } else {
         console.warn("getUserMedia() is not supported by your browser");
     }
@@ -36,19 +35,19 @@ function startApp() {
 // ********************************************************************
 // create mediapipe
 // ********************************************************************
-const createPoseLandmarker = async () => {
+const createHandLandmarker = async () => {
     const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
-    poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
         baseOptions: {
-            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
             delegate: "GPU"
         },
         runningMode: "VIDEO",
-        numPoses: 2
+        numHands: 2
     });
     enableWebcamButton.addEventListener("click", enableCam);
     enableWebcamButton.innerText = "Start de Game!"
-    console.log("poselandmarker is ready!")
+    console.log("HandLandmarker is ready!")
 };
 
 
@@ -57,14 +56,15 @@ const createPoseLandmarker = async () => {
 ********************************************************************/
 function enableCam(event) {
     console.log("start the webcam")
-    if (!poseLandmarker) {
-        console.log("Wait! poseLandmaker not loaded yet.");
+    if (!handLandmarker) {
+        console.log("Wait! handLandmaker not loaded yet.");
         return;
     }
     webcamRunning = true;
     enableWebcamButton.innerText = "Predicting";
     enableWebcamButton.disabled = true
 
+    //width and heigt for the video canvas
     const constraints = {
         video: {
             width: { exact: 480 },
@@ -88,8 +88,10 @@ function enableCam(event) {
 // detect poses!!
 // ********************************************************************
 async function predictWebcam() {
+    let results = undefined;
     let startTimeMs = performance.now();
-    poseLandmarker.detectForVideo(video, performance.now(), (result) => drawPose(result));
+    results = handLandmarker.detectForVideo(video, startTimeMs,);
+    drawHand(results);
 
     if (webcamRunning === true) {
         window.requestAnimationFrame(predictWebcam);
@@ -99,22 +101,25 @@ async function predictWebcam() {
 // ********************************************************************
 // draw the poses or log them in the console
 // ********************************************************************
-function drawPose(result) {
+function drawHand(result) {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     // log de coordinaten
     // console.log(result)
     // teken de coordinaten in het canvas
     for (const landmark of result.landmarks) {
         console.log(landmark);
-        drawingUtils.drawLandmarks(landmark, { radius: 1 });
-        drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
-        
+        drawingUtils.drawLandmarks(landmark, { color: "#FF0000", radius: 1 });
+        drawingUtils.drawConnectors(landmark, HandLandmarker.HAND_CONNECTIONS, {
+            color: "#00FF00",
+            lineWidth: 1
+        });
+
         for (const nose of landmark) {
             console.log(`x position ${nose.x} y position ${nose.y}`);
 
             //Beweeg de bril mee
-            let translateX = (1-nose.x) * 480-85;
-            let translateY = nose.y * 270 -60;
+            let translateX = (1 - nose.x) * 480 - 85;
+            let translateY = nose.y * 270 - 60;
             sunglasses.style.transform = "translate(" + translateX + "px, " + translateY + "px)";
             break;
         }
