@@ -1,4 +1,8 @@
 import { PoseLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
+import kNear from "./knear.js"
+
+const k = 3
+const machine = new kNear(k);
 
 let sunglasses = document.querySelector(".sunglasses");
 
