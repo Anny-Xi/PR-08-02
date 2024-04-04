@@ -12,6 +12,7 @@ const drawingUtils = new DrawingUtils(canvasCtx);
 
 const savedHands = [];
 const saveButton = document.getElementById("save");
+saveButton.addEventListener("click", saveHandler);
 
 
 let handLandmarker = undefined;
@@ -116,23 +117,101 @@ function drawHand(result) {
             lineWidth: 1
         });
 
-        for (const markPosition of landmark) {
-            // console.log(`x position ${markPosition.x} y position ${markPosition.y}`);
-            savedHands.push(markPosition.x, + markPosition.y);
+        
 
-        }
+        // console.log(savedHands);
 
-        const hands = JSON.stringify(savedHands);
+        
 
-        saveButton.addEventListener("click", () => {
-            localStorage.setItem("left", hands);
-            console.log(localStorage.getItem("left"))
-        });
     }
 
-    //clear array for the hand landmarks
-    savedHands.length = 0;
+    // const hands = savedHands;
+    // const hands = [];
 
+    // saveButton.addEventListener("click", () => {
+    //     left.push(hands)
+    //     console.log(left)
+    //     // left.push(JSON.parse(localStorage.getItem('left')));
+    //     // localStorage.setItem('left', JSON.stringify(left));
+    //     // console.log(localStorage.getItem('left'));
+    // });
+
+
+
+    // const hands = JSON.stringify(savedHands);
+
+
+
+
+    document.addEventListener('keydown', (event) => {
+        switch (event.key) {
+            case 'ArrowUp':
+                up.push(JSON.parse(localStorage.getItem('up')));
+                up.push(hands)
+                localStorage.setItem("up", up);
+                console.log(localStorage.getItem("up"))
+                break;
+            case 'ArrowDown':
+                localStorage.setItem("down", hands);
+                console.log(localStorage.getItem("down"))
+                break;
+            case 'ArrowLeft':
+                localStorage.setItem("left", hands);
+                console.log(localStorage.getItem("left"))
+                break;
+            case 'ArrowRight':
+                localStorage.setItem("right", hands);
+                console.log(localStorage.getItem("right"))
+                break;
+        }
+    });
+
+
+
+    //clear array for the hand landmarks
+    // savedHands.length = 0;
+
+}
+
+function saveHandler() {
+    let startTimeMs = performance.now();
+    const results = handLandmarker.detectForVideo(video, startTimeMs,);
+    
+    if(results.landmarks.length === 0){
+        return;
+    }
+    console.log(results.landmarks[0]);
+    let savedHands = [];
+    for (const markPosition of results.landmarks[0]) {
+        // console.log(`x position ${markPosition.x} y position ${markPosition.y}`);
+        savedHands.push(markPosition.x, + markPosition.y);
+    }
+    // lege tempArray = []
+    let handArray = []
+    // localstorage ophalen
+        // als leeg
+        // als niet leeg
+    if (localStorage.getItem('left')) {
+        // push naar tempArray
+        // omzetten naar array
+        handArray = JSON.parse(localStorage.getItem('left'));
+    }
+    // push naar array
+    handArray.push(savedHands);        
+    // omzetten naar json
+    console.log(handArray)
+    const handJson = JSON.stringify(handArray);
+    // localstorage setItem
+    localStorage.setItem('left', handJson);
+
+    // const saveH = []
+
+    // localStorage.setItem('left', null);
+
+    // saveH.push(JSON.parse(localStorage.getItem('left')));
+    // saveH.push(savedHands);
+
+    // localStorage.setItem('left', JSON.stringify(saveH));
 }
 
 
