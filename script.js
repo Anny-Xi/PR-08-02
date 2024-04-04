@@ -1,8 +1,4 @@
 import { HandLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
-import kNear from "./knear.js"
-
-const k = 3
-const machine = new kNear(k);
 
 const video = document.getElementById("webcam");
 const canvasElement = document.getElementById("output_canvas");
@@ -12,7 +8,7 @@ const drawingUtils = new DrawingUtils(canvasCtx);
 
 const savedHands = [];
 const saveButton = document.getElementById("save");
-saveButton.addEventListener("click", saveHandler);
+saveButton.addEventListener("click", checkHandler);
 
 
 let handLandmarker = undefined;
@@ -117,65 +113,31 @@ function drawHand(result) {
             lineWidth: 1
         });
 
-        
-
-        // console.log(savedHands);
-
-        
-
     }
-
-    // const hands = savedHands;
-    // const hands = [];
-
-    // saveButton.addEventListener("click", () => {
-    //     left.push(hands)
-    //     console.log(left)
-    //     // left.push(JSON.parse(localStorage.getItem('left')));
-    //     // localStorage.setItem('left', JSON.stringify(left));
-    //     // console.log(localStorage.getItem('left'));
-    // });
-
-
-
-    // const hands = JSON.stringify(savedHands);
-
-
-
-
-    document.addEventListener('keydown', (event) => {
-        switch (event.key) {
-            case 'ArrowUp':
-                up.push(JSON.parse(localStorage.getItem('up')));
-                up.push(hands)
-                localStorage.setItem("up", up);
-                console.log(localStorage.getItem("up"))
-                break;
-            case 'ArrowDown':
-                localStorage.setItem("down", hands);
-                console.log(localStorage.getItem("down"))
-                break;
-            case 'ArrowLeft':
-                localStorage.setItem("left", hands);
-                console.log(localStorage.getItem("left"))
-                break;
-            case 'ArrowRight':
-                localStorage.setItem("right", hands);
-                console.log(localStorage.getItem("right"))
-                break;
-        }
-    });
-
-
-
-    //clear array for the hand landmarks
-    // savedHands.length = 0;
-
 }
 
-function saveHandler() {
+
+document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+        case 'ArrowUp':
+            saveHandler("up");
+            break;
+        case 'ArrowDown':
+            saveHandler("down");
+            break;
+        case 'ArrowLeft':
+            saveHandler("left");
+            break;
+        case 'ArrowRight':
+            saveHandler("right");
+            break;
+    }
+});
+
+// function om hand data te bewaren
+function saveHandler(direction) {
     let startTimeMs = performance.now();
-    const results = handLandmarker.detectForVideo(video, startTimeMs,);
+    const results = handLandmarker.detectForVideo(video, startTimeMs);
     
     if(results.landmarks.length === 0){
         return;
@@ -184,34 +146,55 @@ function saveHandler() {
     let savedHands = [];
     for (const markPosition of results.landmarks[0]) {
         // console.log(`x position ${markPosition.x} y position ${markPosition.y}`);
-        savedHands.push(markPosition.x, + markPosition.y);
+        savedHands.push(markPosition.x, + markPosition.y, +markPosition.x);
     }
     // lege tempArray = []
     let handArray = []
     // localstorage ophalen
         // als leeg
         // als niet leeg
-    if (localStorage.getItem('left')) {
+    if (localStorage.getItem(direction)) {
         // push naar tempArray
         // omzetten naar array
-        handArray = JSON.parse(localStorage.getItem('left'));
+        handArray = JSON.parse(localStorage.getItem(direction));
     }
+
     // push naar array
     handArray.push(savedHands);        
     // omzetten naar json
     console.log(handArray)
     const handJson = JSON.stringify(handArray);
+
     // localstorage setItem
-    localStorage.setItem('left', handJson);
+    localStorage.setItem(direction, handJson);
 
-    // const saveH = []
+}
 
-    // localStorage.setItem('left', null);
+function checkHandler(){
 
-    // saveH.push(JSON.parse(localStorage.getItem('left')));
-    // saveH.push(savedHands);
+    // localstorage ophalen
+    let leftHands = [];
+    let rightHands = [];
+    let upHands = [];
+    let downHands = [];
 
-    // localStorage.setItem('left', JSON.stringify(saveH));
+    leftHands = JSON.parse(localStorage.getItem("left"));
+    console.log (leftHands);
+    
+    
+    // neurol network aanmaken
+
+    // localstorage data labellen -> data gereed maken
+
+    // Neurol network trainen
+
+    // Model opslaan
+
+
+
+    // voor spelling doen ? -> andere functie?
+
+
 }
 
 
