@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="collect.js" type="module"></script>
+    <script src="test.js" type="module"></script>
     <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
     <link rel="stylesheet" href="style.css">
 
@@ -16,20 +16,30 @@
 <body>
     <main>
         <section>
-            <h1>Collect data en trainen de model</h1>
-            <p>druk op de pijlen toets om bijbehorende hand data te verzamelen. Bijvoorbeeld: hand richting recht, druk op recht pijl op de toets bord. 
+            <h1>trining model</h1>
+            <p>Wanneer je data verzameld heb, kan je de model trainen.<br>
+                Klik op "What pose is it om model te trainen en kijk hoe goed het doet"
             </p>
             <button id="webcamButton">Loading Pose Model...</button>
+        </section>
+        <section>
+            <button id="prediction">What pose is it?</button>
+        </section>
+        <section>
+            <button id="save-model">Model opslaan</button>
         </section>
         <section id="liveView" class="videoView">
             <video id="webcam" autoplay playsinline muted></video>
             <canvas class="output_canvas" id="output_canvas"></canvas>
             <div id="canvas_template"></div>
         </section>
-        <section>
-            <button id="label">Data opslaan</button>
-        </section>
-
+       
+        <!-- <section class="scores">
+            <p>Your score is
+            <p id="player_score"></p> point</p>
+            <p>NPC score is
+            <p id="npc_score"></p> point</p>
+        </section> -->
     </main>
 </body>
 

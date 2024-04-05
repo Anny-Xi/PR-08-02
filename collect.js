@@ -136,7 +136,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// function om hand data te bewaren
+// localstorage hand datas bewaren van bijbehorende lable
 function saveHandler(direction) {
     let startTimeMs = performance.now();
     const results = handLandmarker.detectForVideo(video, startTimeMs);
