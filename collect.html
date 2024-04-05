@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="collect.js" type="module"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <title>Porgrameren 8</title>
+
+</head>
+
+<body>
+    <main>
+        <section>
+            <h1>Collect data en trainen de model</h1>
+            <p>druk op de pijlen toets om bijbehorende hand data te verzamelen. 
+            </p>
+            <button id="webcamButton">Loading Pose Model...</button>
+        </section>
+        <section id="liveView" class="videoView">
+            <video id="webcam" autoplay playsinline muted></video>
+            <canvas class="output_canvas" id="output_canvas"></canvas>
+            <div id="canvas_template"></div>
+        </section>
+        <section>
+            <button id="label">Data opslaan</button>
+        </section>
+
+    </main>
+</body>
+
+</html>

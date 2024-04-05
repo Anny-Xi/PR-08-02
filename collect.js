@@ -6,9 +6,8 @@ const enableWebcamButton = document.getElementById("webcamButton");
 const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 
-const saveButton = document.getElementById("save");
-saveButton.addEventListener("click", checkHandler);
-
+const labelButton = document.getElementById("label");
+labelButton.addEventListener("click", addLabelHandler);
 
 let handLandmarker = undefined;
 let webcamRunning = false;
@@ -19,7 +18,6 @@ const videoHeight = "270px"
 
 // neurol network aanmaken
 const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
-// nn.loadData('hands-datas.json')
 
 
 // ********************************************************************
@@ -120,7 +118,7 @@ function drawHand(result) {
     }
 }
 
-
+// key event 
 document.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'ArrowUp':
@@ -135,11 +133,6 @@ document.addEventListener('keydown', (event) => {
         case 'ArrowRight':
             saveHandler("right");
             break;
-        case 's':
-            //save training data
-            nn.saveData('hands-datas');
-        case 'm':
-            nn.save('hands-model')
     }
 });
 
@@ -179,7 +172,8 @@ function saveHandler(direction) {
 
 }
 
-function checkHandler() {
+// fucntion om alle data gereedt maken voor trainen
+function addLabelHandler() {
     let data = []
 
     labelData(data, "left");
@@ -190,27 +184,21 @@ function checkHandler() {
     data = data.toSorted(() => (Math.random() - 0.5));
 
 
-    trainHandler(data, nn);
+    addDataHandler(data, nn);
 
-    // Neurol network trainen
-
-        // nn.train({ epochs: 32 }, () => finishedTraining());
-    
-    // Model opslaan
-    nn.train({ epochs: 32 }, () => finishedTraining());
-
+    nn.saveData('hands-datas');
 }
 
 // localstorage data labellen -> training data gereed maken
 function labelData(data, direction) {
 
-    //Halen localstorage met dat label
+    // halen localstorage met dat label
     let hands = JSON.parse(localStorage.getItem(direction));
 
+    // als er geen data is, terug naar functie
     if (hands.length === 0) {
         return;
     }
-
     // push dat naar het data met label
     for (const hand of hands) {
         data.push({ pose: hand, label: direction })
@@ -219,37 +207,12 @@ function labelData(data, direction) {
 }
 
 
-function trainHandler(data, nn) {
+function addDataHandler(data, nn) {
     for (const train of data) {
         // console.log(`the data is [${train.pose}], { label: ${train.label} }`);
         nn.addData(train.pose, { label: train.label });
     }
-    // nn.save('hands-model-data');
     nn.normalizeData();
-}
-
-
-// voor spelling doen ? -> andere functie?
-
-async function finishedTraining() {
-
-    let startTimeMs = performance.now();
-    const detection = handLandmarker.detectForVideo(video, startTimeMs);
-
-    if (detection.landmarks.length === 0) {
-        return;
-    }
-    let handData = [];
-    for (const markPosition of detection.landmarks[0]) {
-        handData.push(markPosition.x, + markPosition.y, +markPosition.x);
-    }
-    
-    const results = await nn.classify(
-        [
-            handData
-        ]
-    )
-    console.log(results)
 }
 
 startApp()
