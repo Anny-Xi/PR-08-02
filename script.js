@@ -6,7 +6,6 @@ const enableWebcamButton = document.getElementById("webcamButton");
 const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 
-const savedHands = [];
 const saveButton = document.getElementById("save");
 saveButton.addEventListener("click", checkHandler);
 
@@ -17,6 +16,11 @@ let lastVideoTime = -1;
 
 const videoWidth = "480px"
 const videoHeight = "270px"
+
+// neurol network aanmaken
+const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
+// nn.loadData('hands-datas.json')
+
 
 // ********************************************************************
 // if webcam access, load landmarker and enable webcam button
@@ -131,6 +135,11 @@ document.addEventListener('keydown', (event) => {
         case 'ArrowRight':
             saveHandler("right");
             break;
+        case 's':
+            //save training data
+            nn.saveData('hands-datas');
+        case 'm':
+            nn.save('hands-model')
     }
 });
 
@@ -138,8 +147,8 @@ document.addEventListener('keydown', (event) => {
 function saveHandler(direction) {
     let startTimeMs = performance.now();
     const results = handLandmarker.detectForVideo(video, startTimeMs);
-    
-    if(results.landmarks.length === 0){
+
+    if (results.landmarks.length === 0) {
         return;
     }
     console.log(results.landmarks[0]);
@@ -151,8 +160,8 @@ function saveHandler(direction) {
     // lege tempArray = []
     let handArray = []
     // localstorage ophalen
-        // als leeg
-        // als niet leeg
+    // als leeg
+    // als niet leeg
     if (localStorage.getItem(direction)) {
         // push naar tempArray
         // omzetten naar array
@@ -160,7 +169,7 @@ function saveHandler(direction) {
     }
 
     // push naar array
-    handArray.push(savedHands);        
+    handArray.push(savedHands);
     // omzetten naar json
     console.log(handArray)
     const handJson = JSON.stringify(handArray);
@@ -170,32 +179,77 @@ function saveHandler(direction) {
 
 }
 
-function checkHandler(){
+function checkHandler() {
+    let data = []
 
-    // localstorage ophalen
-    let leftHands = [];
-    let rightHands = [];
-    let upHands = [];
-    let downHands = [];
+    labelData(data, "left");
+    labelData(data, "right");
+    labelData(data, "up");
+    labelData(data, "down");
 
-    leftHands = JSON.parse(localStorage.getItem("left"));
-    console.log (leftHands);
-    
-    
-    // neurol network aanmaken
+    data = data.toSorted(() => (Math.random() - 0.5));
 
-    // localstorage data labellen -> data gereed maken
+
+    trainHandler(data, nn);
 
     // Neurol network trainen
 
+        // nn.train({ epochs: 32 }, () => finishedTraining());
+    
     // Model opslaan
-
-
-
-    // voor spelling doen ? -> andere functie?
-
+    nn.train({ epochs: 32 }, () => finishedTraining());
 
 }
 
+// localstorage data labellen -> training data gereed maken
+function labelData(data, direction) {
+
+    //Halen localstorage met dat label
+    let hands = JSON.parse(localStorage.getItem(direction));
+
+    if (hands.length === 0) {
+        return;
+    }
+
+    // push dat naar het data met label
+    for (const hand of hands) {
+        data.push({ pose: hand, label: direction })
+    }
+
+}
+
+
+function trainHandler(data, nn) {
+    for (const train of data) {
+        // console.log(`the data is [${train.pose}], { label: ${train.label} }`);
+        nn.addData(train.pose, { label: train.label });
+    }
+    // nn.save('hands-model-data');
+    nn.normalizeData();
+}
+
+
+// voor spelling doen ? -> andere functie?
+
+async function finishedTraining() {
+
+    let startTimeMs = performance.now();
+    const detection = handLandmarker.detectForVideo(video, startTimeMs);
+
+    if (detection.landmarks.length === 0) {
+        return;
+    }
+    let handData = [];
+    for (const markPosition of detection.landmarks[0]) {
+        handData.push(markPosition.x, + markPosition.y, +markPosition.x);
+    }
+    
+    const results = await nn.classify(
+        [
+            handData
+        ]
+    )
+    console.log(results)
+}
 
 startApp()
