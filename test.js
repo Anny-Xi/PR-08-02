@@ -1,129 +1,42 @@
-import { HandLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.0";
-
-const video = document.getElementById("webcam");
-const canvasElement = document.getElementById("output_canvas");
-const enableWebcamButton = document.getElementById("webcamButton");
-const canvasCtx = canvasElement.getContext("2d");
-const drawingUtils = new DrawingUtils(canvasCtx);
+import {startApp, handLandmarker, video} from './mediapipe-connection.js';
 
 const predictButton = document.getElementById("prediction");
-// predictButton.addEventListener("click", predictHandler);
+predictButton.addEventListener("click", finishedTraining);
 
-const saveModelButton = document.getElementById("save-model");
 
-let handLandmarker = undefined;
-let webcamRunning = false;
-let lastVideoTime = -1;
-
-const videoWidth = "480px"
-const videoHeight = "270px"
 
 // neurol network aanmaken
 const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
-nn.load('model/hands-model.json', modelLoaded);
 
-function modelLoaded(){
+const modelInfo = {
+    model: 'model/model.json',
+    metadata: 'model/model_meta.json',
+    weights: 'model/model.weights.bin',
+};
+nn.load(modelInfo, modelLoaded);
+
+
+function modelLoaded() {
     console.log("model loaded");
 }
 
+async function finishedTraining() {
 
-// ********************************************************************
-// if webcam access, load landmarker and enable webcam button
-// ********************************************************************
-function startApp() {
-    const hasGetUserMedia = () => { var _a; return !!((_a = navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.getUserMedia); };
-    if (hasGetUserMedia()) {
-        createHandLandmarker();
-    } else {
-        console.warn("getUserMedia() is not supported by your browser");
-    }
-}
+    let startTimeMs = performance.now();
+    const detection = handLandmarker.detectForVideo(video, startTimeMs);
 
-// ********************************************************************
-// create mediapipe
-// ********************************************************************
-const createHandLandmarker = async () => {
-    const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm");
-    handLandmarker = await HandLandmarker.createFromOptions(vision, {
-        baseOptions: {
-            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-            delegate: "GPU"
-        },
-        runningMode: "VIDEO",
-        numHands: 1
-    });
-    enableWebcamButton.addEventListener("click", enableCam);
-    enableWebcamButton.innerText = "Start de camera!"
-    console.log("HandLandmarker is ready!")
-};
-
-
-/********************************************************************
-// Continuously grab image from webcam stream and detect it.
-********************************************************************/
-function enableCam(event) {
-    console.log("start the webcam")
-    if (!handLandmarker) {
-        console.log("Wait! handLandmaker not loaded yet.");
+    if (detection.landmarks.length === 0) {
         return;
     }
-    webcamRunning = true;
-    enableWebcamButton.innerText = "Predicting";
-    enableWebcamButton.disabled = true
-
-    //width and heigt for the video canvas
-    const constraints = {
-        video: {
-            width: { exact: 480 },
-            height: { exact: 270 }
-        }
-    };
-
-    // Activate the webcam stream.
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-        video.srcObject = stream;
-        video.addEventListener("loadeddata", async () => {
-            canvasElement.style.height = videoHeight;
-            canvasElement.style.width = videoWidth;
-            video.style.height = videoHeight;
-            video.style.width = videoWidth;
-            predictWebcam();
-        });
-    });
-}
-// ********************************************************************
-// detect poses!!
-// ********************************************************************
-async function predictWebcam() {
-    let results = undefined;
-    let startTimeMs = performance.now();
-    results = handLandmarker.detectForVideo(video, startTimeMs,);
-    drawHand(results);
-
-    if (webcamRunning === true) {
-        window.requestAnimationFrame(predictWebcam);
+    let handData = [];
+    for (const markPosition of detection.landmarks[0]) {
+        handData.push(markPosition.x, + markPosition.y, +markPosition.x);
     }
+
+    const results = await nn.classify(
+            handData
+    );
+    console.log(results);
 }
-
-// ********************************************************************
-// draw the poses or log them in the console
-// ********************************************************************
-function drawHand(result) {
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    // log de coordinaten
-    // console.log(result)
-
-    // teken de coordinaten in het canvas
-    for (const landmark of result.landmarks) {
-        // console.log(landmark);
-        drawingUtils.drawLandmarks(landmark, { color: "#FF0000", radius: 1 });
-        drawingUtils.drawConnectors(landmark, HandLandmarker.HAND_CONNECTIONS, {
-            color: "#00FF00",
-            lineWidth: 1
-        });
-
-    }
-}
-
 
 startApp()
