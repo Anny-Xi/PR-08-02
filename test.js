@@ -7,7 +7,7 @@ const canvasCtx = canvasElement.getContext("2d");
 const drawingUtils = new DrawingUtils(canvasCtx);
 
 const predictButton = document.getElementById("prediction");
-predictButton.addEventListener("click", predictHandler);
+// predictButton.addEventListener("click", predictHandler);
 
 const saveModelButton = document.getElementById("save-model");
 
@@ -20,7 +20,11 @@ const videoHeight = "270px"
 
 // neurol network aanmaken
 const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
-nn.loadData('hands-datas.json')
+nn.load('model/hands-model.json', modelLoaded);
+
+function modelLoaded(){
+    console.log("model loaded");
+}
 
 
 // ********************************************************************
@@ -121,36 +125,5 @@ function drawHand(result) {
     }
 }
 
-function predictHandler(){
-    nn.train({ epochs: 32 }, () => finishedTraining());
-}
-
-// voor spelling doen ? -> andere functie?
-
-function saveModelHandler(){
-    nn.save('hands-model')
-}
-
-async function finishedTraining() {
-
-    let startTimeMs = performance.now();
-    const detection = handLandmarker.detectForVideo(video, startTimeMs);
-
-    if (detection.landmarks.length === 0) {
-        return;
-    }
-    let handData = [];
-    for (const markPosition of detection.landmarks[0]) {
-        handData.push(markPosition.x, + markPosition.y, +markPosition.x);
-    }
-
-    const results = await nn.classify(
-        [
-            handData
-        ]
-    );
-    console.log(results);
-    saveModelButton.addEventListener("click", saveModelHandler);
-}
 
 startApp()

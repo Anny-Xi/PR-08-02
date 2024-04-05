@@ -127,10 +127,6 @@ function predictHandler(){
 
 // voor spelling doen ? -> andere functie?
 
-function saveModelHandler(){
-    nn.save('hands-model')
-}
-
 async function finishedTraining() {
 
     let startTimeMs = performance.now();
@@ -145,12 +141,12 @@ async function finishedTraining() {
     }
 
     const results = await nn.classify(
-        [
+        // [
             handData
-        ]
+        // ]
     );
     console.log(results);
-    saveModelButton.addEventListener("click", saveModelHandler);
+    nn.save()
 }
 
 startApp()
