@@ -105,3 +105,5 @@ function addDataHandler(data, nn) {
 }
 
 startApp()
+
+export {saveHandler, labelData, addLabelHandler}
