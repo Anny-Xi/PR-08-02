@@ -4,10 +4,10 @@
 
 ## Installatie ?
 
-Voor dit applicatie hoef er geen installatie gedaan te worden/
+Geen installatie nodig
 
 
-## Als je eigen model willen traien 
+## Als je eigen model willen traien en gebruiken
 
 Klik op button met tekst "Klik hier om eigen model te trainen" en volg de instuctie.
 
@@ -23,7 +23,7 @@ nn.loadData('naameJson.json', console.log("load data"))
 De model wordt getraint met meegegeven data, hierna wordt 3 bestand gedownload. 
 Verplaats dat allemaal in een map binnen dit project. 
 
-en verandert de volgende gegevens in test.js naar jouw eigen.
+en verandert de volgende gegevens in test.js en game.js naar jouw eigen.
 
 ```sh
 const modelInfo = {
