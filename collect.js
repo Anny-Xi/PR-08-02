@@ -37,7 +37,7 @@ function saveHandler(direction) {
     let savedHands = [];
     for (const markPosition of results.landmarks[0]) {
         // console.log(`x position ${markPosition.x} y position ${markPosition.y}`);
-        savedHands.push(markPosition.x, + markPosition.y, +markPosition.x);
+        savedHands.push(markPosition.x, + markPosition.y, +markPosition.z);
     }
     // lege tempArray = []
     let handArray = []

@@ -18,12 +18,13 @@ function gameStart() {
 
     let gameEnd = false;
     let startScore = 0
-    let chance = 3;
+    let chance = 2;
     let startTimer = 3;
 
     // wacht om camera te starten. 
     if (!webcamRunning) {
         message.innerHTML = "De camera is nog niet opgestaart";
+        game.disabled = false;
         return;
     }
 
@@ -47,15 +48,13 @@ function gameStart() {
 
 
     // eerste ronden opstarten.
-    if (!gameEnd) {
-        // speler doet een pose en wacht tot time out
-        countDownHandler(startTimer, startScore, chance);
+    // speler doet een pose en wacht tot time out
+    countDownHandler(startTimer, startScore, chance);
 
-        playerChance.innerHTML = `Je heb nog ${chance} kansen`;
-        playerScore.innerHTML = `Jouw score is ${startScore}`;
+    playerChance.innerHTML = `Je heb nog ${chance} kansen`;
+    playerScore.innerHTML = `Jouw score is ${startScore}`;
 
-        nextRoundButton.addEventListener("click", nextRoundHandler);
-    }
+    nextRoundButton.addEventListener("click", nextRoundHandler);
 
     // als chance = 0 
 
@@ -99,6 +98,9 @@ async function countDownHandler(seconds, score, chance) {
 
             if (results) {
                 score++;
+                if (second > 1) {
+                    second--;
+                }
             } else if (!results) {
                 chance--;
             }
@@ -135,9 +137,9 @@ const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
 
 // model informatie ophallen
 const modelInfo = {
-    model: 'model/model.json',
-    metadata: 'model/model_meta.json',
-    weights: 'model/model.weights.bin',
+    model: 'modelNew/model.json',
+    metadata: 'modelNew/model_meta.json',
+    weights: 'modelNew/model.weights.bin',
 };
 
 // model inladen
@@ -159,7 +161,7 @@ async function playerDetactHandler(correctPose) {
         return;
     }
     for (const markPosition of detection.landmarks[0]) {
-        handData.push(markPosition.x, + markPosition.y, +markPosition.x);
+        handData.push(markPosition.x, + markPosition.y, +markPosition.z);
     }
     const results = await nn.classify(handData);
 
