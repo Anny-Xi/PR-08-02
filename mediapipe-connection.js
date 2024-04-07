@@ -112,4 +112,4 @@ function drawHand(result) {
     }
 }
 
-export {startApp, handLandmarker, video}
+export {startApp, handLandmarker, video, webcamRunning}
