@@ -35,7 +35,7 @@ function labelData(data, direction, itemName) {
     for (const hand of hands) {
         data.push({ pose: hand, label: direction })
     }
-
+}
 
 
 // localstorage hand datas bewaren van bijbehorende lable
