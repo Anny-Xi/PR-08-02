@@ -8,32 +8,18 @@ const message = document.getElementById("message");
 let gamePose = document.getElementById("pose");
 
 let playerScore = document.getElementById("player_score");
+let playerChance = document.getElementById("player_chance");
 
-
-
-const richting = ["links", "rechts", "boven", "beneden"];
-const checkRichting = ["right", "left", "up", "down"]
-
-let startTimer = 5;
-
-let startScore = 0
-
+const richting = ["links", "rechts", "omhoog", "omlaag"];
+const checkRichting = ["right", "left", "down", "up"]
 
 function gameStart() {
+    game.disabled = true;
+
     let gameEnd = false;
-
+    let startScore = 0
     let chance = 3;
-
-    const gameButtonSection = document.getElementById("game-buttons");
-
-    const nextRoundButton = document.createElement("button");
-    nextRoundButton.textContent = "Next round";
-
-    nextRoundButton.addEventListener("click", function () {
-        alert("Button clicked!");
-    });
-    gameButtonSection.appendChild(nextRoundButton);
-
+    let startTimer = 3;
 
     // wacht om camera te starten. 
     if (!webcamRunning) {
@@ -45,19 +31,31 @@ function gameStart() {
 
     message.innerHTML = "Game start it";
 
-    // game heeft een random richting van de vier
+    // start speler gegevens opslagen
+    setScoreHandler(startTimer, startScore, chance)
+
+    // button toevoegen volgende ronden
+
+    const gameButtonSection = document.getElementById("game-buttons");
+
+    const nextRoundButton = document.createElement("button");
+    nextRoundButton.setAttribute('id', 'next');
+    nextRoundButton.textContent = "Next round";
+    nextRoundButton.disabled = false;
+
+    gameButtonSection.appendChild(nextRoundButton);
 
 
-    // timer opstarten
+    // eerste ronden opstarten.
     if (!gameEnd) {
-        let setGame = directionHandler(richting, checkRichting);
-        gamePose.innerHTML = setGame[0];
         // speler doet een pose en wacht tot time out
-        countDownHandler(startTimer, setGame[1]);
+        countDownHandler(startTimer, startScore, chance);
 
-        playerScore.innerHTML = startScore;
+        playerChance.innerHTML = `Je heb nog ${chance} kansen`;
+        playerScore.innerHTML = `Jouw score is ${startScore}`;
+
+        nextRoundButton.addEventListener("click", nextRoundHandler);
     }
-
 
     // als chance = 0 
 
@@ -65,22 +63,57 @@ function gameStart() {
 
 
 }
+function setScoreHandler(timer, score, chance) {
+    localStorage.setItem('timer', timer);
+    localStorage.setItem('score', score);
+    localStorage.setItem('chance', chance);
+}
 
 
+function nextRoundHandler() {
+    let time = localStorage.getItem('timer');
+    let score = localStorage.getItem('score');
+    let chance = localStorage.getItem('chance');
 
-function countDownHandler(seconds, pose) {
-    const timer = setInterval(() => {
+    countDownHandler(time, score, chance);
+}
+
+async function countDownHandler(seconds, score, chance) {
+
+    let nextRoundButton = document.getElementById('next')
+
+    let second = seconds;
+    let setGame = directionHandler(richting, checkRichting);
+    gamePose.innerHTML = setGame[0];
+    let correctPose = setGame[1];
+
+    const timer = setInterval(async () => {
+        nextRoundButton.disabled = true;
         message.innerHTML = seconds
         seconds--;
 
         if (seconds < 0) {
             clearInterval(timer);
+            let results = await playerDetactHandler(correctPose);
+            console.log(results);
 
-            if (playerDetactHandler(pose)) {
-                return true
-            } else if (!playerDetactHandler(pose)) {
-                return false
+            if (results) {
+                score++;
+            } else if (!results) {
+                chance--;
             }
+
+            if (chance < 0) {
+                alert('Je bent verloren');
+                nextRoundButton.disabled = true;
+                return
+            }
+            nextRoundButton.disabled = false;
+
+            setScoreHandler(second, score, chance)
+
+            playerChance.innerHTML = `Je heb nog ${chance} kansen`;
+            playerScore.innerHTML = `Jouw score is ${score}`;
 
         }
     }, 1000);
@@ -97,7 +130,6 @@ function directionHandler(directions, answer) {
 }
 
 
-
 // neurol network aanmaken
 const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
 
@@ -111,20 +143,21 @@ const modelInfo = {
 // model inladen
 nn.load(modelInfo, modelLoaded);
 
-
 function modelLoaded() {
     console.log("model loaded");
 }
 
 async function playerDetactHandler(correctPose) {
+    //correctPose
+
+    let correct = false;
 
     let startTimeMs = performance.now();
     const detection = handLandmarker.detectForVideo(video, startTimeMs);
-
+    let handData = [];
     if (detection.landmarks.length === 0) {
         return;
     }
-    let handData = [];
     for (const markPosition of detection.landmarks[0]) {
         handData.push(markPosition.x, + markPosition.y, +markPosition.x);
     }
@@ -135,13 +168,14 @@ async function playerDetactHandler(correctPose) {
     // Model vergelijk de data  <Links <-> rechts | boven <-> beneden>
     if (pose === correctPose) {
         console.log("pose correct");
-        return true;
+        console.log(pose);
+        correct = true;
+        return correct;
     } else {
         console.log("pose niet correct");
-        return false;
+        console.log(pose);
+        return correct;
     }
-
 }
 
 startApp();
-// finishedTraining();
