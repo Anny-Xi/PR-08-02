@@ -83,22 +83,10 @@ const nn = ml5.neuralNetwork({ task: 'classification', debug: true });
 //     weights: 'model/model.weights.bin',
 // };
 
-// const modelInfo = {
-//     model: 'modelNew/model.json',
-//     metadata: 'modelNew/model_meta.json',
-//     weights: 'modelNew/model.weights.bin',
-// };
-
-// const modelInfo = {
-//     model: 'modelNewDataOld/model.json',
-//     metadata: 'modelNewDataOld/model_meta.json',
-//     weights: 'modelNewDataOld/model.weights.bin',
-// };
-
 const modelInfo = {
-    model: 'modelOldDataNew/model.json',
-    metadata: 'modelOldDataNew/model_meta.json',
-    weights: 'modelOldDataNew/model.weights.bin',
+    model: 'modelNew/model.json',
+    metadata: 'modelNew/model_meta.json',
+    weights: 'modelNew/model.weights.bin',
 };
 
 nn.load(modelInfo, modelLoaded);
